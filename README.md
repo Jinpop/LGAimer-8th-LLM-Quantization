@@ -1,5 +1,26 @@
 # LLM Quantization 실험 레포
 
+## 본 브런치 코드 요약
+
+- **`exaone_final_quant_factory.ipynb`**: EXAONE 4.0용 **AWQ W4A16** 양자화 파이프라인 노트북
+  - **환경**: Google Colab + `llm-compressor`, Drive 마운트 및 Hugging Face 로그인
+  - **모델**: EXAONE-4.0-1.2B (로컬 `base_model` 또는 Hub)
+  - **Calibration 데이터**: Ko-LongRAG, MANTA-1M(샘플링), KMMLU-Pro, KMMLU-Redux 병합 후 텍스트 포맷으로 전처리
+
+- **AWQ W4A16 설정**
+  - `modifier_type`: `"AWQ"`, `scheme`: `"W4A16"` (가중치 4bit, 활성화 16bit)
+  - `llmcompressor`의 `AWQModifier` 사용, 전략은 `STRATEGIES`에 정의 (예: `10_AWQ_W4A16`)
+
+- **COMMON_CONFIG** (AWQ 포함 모든 전략 공통)
+  - `targets`: `["Linear"]` — 양자화 적용 레이어
+  - `ignore`: `["lm_head", "norm", "rotary_emb"]` — EXAONE 4.0 QK-Reorder-LN 등 민감 레이어 제외
+  - `num_calib`: `min(len(calib_ds), 512)` — calibration 샘플 수
+  - `max_seq`: `2048` — calibration 시 최대 시퀀스 길이
+
+- **제출물**: 양자화 완료 시 `submit_{전략명}.zip` 자동 생성
+
+---
+
 ## 목표
 - 원본(FP16/BF16) 모델의 **베이스라인 성능** 측정
 - 양자화 적용
